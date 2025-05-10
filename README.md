@@ -129,6 +129,6 @@ Abra o arquivo `public/index.html` no navegador.
 
 ## 🛡️ Licença
 
-MIT — Desenvolvido com ❤️ por **Guilherme Lima**
+MIT — Desenvolvido com por **Guilherme Lima**
 
 ---
