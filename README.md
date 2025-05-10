@@ -1,117 +1,134 @@
-# 🔥 FireChain Backend — Escuta Única, Modular e Escalável
+# 🔥 FireChain – Backend + Frontend Reativo, Seguro e Didático
 
-Backend seguro, assíncrono e em tempo real da **FireChain**, agora com arquitetura reestruturada para **escuta única global**, antiflood inteligente, modularização completa e pronto para atender milhares de usuários — **sem depender de IP público ou servidores expostos**.
+Este repositório reúne **a nova arquitetura completa da FireChain**, combinando:
 
-> 🛡️ Ideal para DApps, bots privados, microserviços ocultos e qualquer aplicação que exija **comunicação segura, escalável e reativa.**
+- 🔁 Backend reativo com escuta única e antiflood inteligente
+- 💻 Frontend modular e funcional para criação e gerenciamento de perfis
+- 🧠 Estrutura ideal para estudo, inspiração ou uso direto em sistemas reais
 
----
-
-## 🧠 O que é possível construir com FireChain?
-
-Com o novo modelo de escuta única (`requests/{uid_reqId}`), você pode construir sistemas onde **usuários e serviços interagem em tempo real**, com isolamento de dados garantido e antifraude embutido.
-
-💡 Exemplos:
-
-- 🔐 Dashboards privados com atualizações automáticas (sem polling!)
-- 🤖 Bots que escutam eventos personalizados de múltiplos usuários
-- 🛰️ Microserviços que funcionam atrás de NAT/firewalls
-- 📲 Aplicações reativas e seguras, sem abrir nenhuma porta externa
-- ⚙️ Sistemas distribuídos com persistência temporária e antiflood
+> 🧩 Serve como case real de projeto escalável, seguro e moderno com Firebase Realtime Database, Node.js e autenticação nativa.
 
 ---
 
-## ⚙️ Tecnologias Utilizadas
+## 🚀 Visão Geral
 
-- **Node.js** com ESModules
-- **Firebase Admin SDK**
-- **Realtime Database (RTDB)**
-- **chalk** para logs estilizados
-- **Arquitetura modular (handlers/lib/cleanup)**
-- **Proteção antiflood por UID integrada**
+A arquitetura FireChain foi projetada para **segurança, performance e privacidade**. Tudo funciona **em tempo real**, com controle individual por usuário, sem depender de IPs públicos, servidores web ou sockets.
 
----
-
-## 🛠️ Como executar localmente
-
-### 1. Clone o repositório
-
-```bash
-git clone https://github.com/seunome/firechain-backend.git
-cd firechain-backend
-```
-
-### 2. Instale as dependências
-
-```bash
-npm install
-```
-
-### 3. Configure o Firebase Admin
-
-Coloque o arquivo `AccountService.json` na raiz do projeto.  
-⚠️ Ele já está protegido via `.gitignore`.
-
-### 4. Inicie o backend
-
-```bash
-npm start     # Produção
-npm run dev   # Desenvolvimento com auto-reload
-```
+✔️ Backend escuta *uma única rota global* (`requests/{uid_reqId}`)  
+✔️ Frontend envia ações com UID autenticado e recebe resposta em tempo real  
+✔️ As respostas expiram após 15 segundos (cache zero, escalabilidade máxima)
 
 ---
 
-## 🧩 Estrutura do Projeto
+## 📦 O que esse projeto entrega?
+
+### Backend:
+- 🔐 Autenticação via Firebase Admin SDK
+- 🧠 Processamento de ações: criar, ver e atualizar perfil
+- 🚫 Antiflood (5 requisições por 10s por UID)
+- 🔄 Expiração automática de respostas
+- 🧼 Limpeza inicial de requests/responses órfãos
+- 📁 Estrutura totalmente modular
+
+### Frontend:
+- ⚙️ Interface de autenticação (email/senha)
+- 👤 Gestão de perfil com nome e bio (opcional)
+- 📲 Requisições seguras com UID embutido
+- 🔔 Feedback em tempo real via toasts
+- 🔍 Exibição de dados com datas formatadas
+- 🔄 Compatível 100% com o backend v2
+
+---
+
+## 🧠 Casos de Uso Possíveis
+
+- 📡 Dashboards reativos que buscam dados via RTDB
+- 🤖 Bots que escutam comandos privados
+- 🛰️ Microserviços atrás de NAT/firewall
+- 💼 Gerenciamento de perfis ou identidades digitais
+- 📚 Projetos de estudo para backend seguro em Firebase
+
+---
+
+## 🧱 Estrutura do Projeto
 
 ```
 firechain-backend/
 │
 ├── src/
-│   ├── backend.js              # Core do servidor
-│   ├── handlers/               # Ações: criar, ver e atualizar perfil
-│   ├── lib/                    # Firebase init, antiflood e utils
-│   └── cleanup/                # Limpeza de requisições/respostas antigas
+│   ├── backend.js              # Ponto de entrada do backend
+│   ├── handlers/               # Ações de perfil
+│   ├── lib/                    # Antiflood, firebase init, sanitização
+│   └── cleanup/                # Limpeza de dados antigos
 │
-├── rules/firebase.rules.json   # Regras de segurança do RTDB
+├── rules/firebase.rules.json   # Segurança de RTDB
+├── public/
+│   ├── index.html              # Interface HTML principal
+│   └── frontend.js             # Lógica JS compatível com o backend v2
 ├── package.json
 └── README.md                   # Este arquivo
 ```
 
 ---
 
-## 🔒 Segurança embutida
+## ⚙️ Como Rodar
 
-- 🔐 Requisições centralizadas em `requests/{uid_reqId}` com validação rígida
-- 🧼 Escrita apenas permitida com `auth.uid === payload.uid`
-- 👁️ Leitura de respostas (`users/{uid}/responses`) apenas pelo dono
-- 🔄 Respostas autoexpiram após 15 segundos
-- 🚫 Nenhum dado é gravado diretamente fora dos fluxos autorizados
-- ⚠️ Antiflood por UID: no máximo 5 requisições a cada 10 segundos
+### 1. Clonar e instalar
+
+```bash
+git clone https://github.com/firechainmainnet/2.0.0_blockchain_firechain.git
+cd 2.0.0_blockchain_firechain
+npm install
+```
+
+### 2. Colocar o arquivo do Firebase
+
+Adicione `AccountService.json` (credencial do Admin SDK) na raiz.
+
+### 3. Iniciar o backend
+
+```bash
+npm start
+```
+
+### 4. Abrir o frontend
+
+Abra o arquivo `public/index.html` no navegador.
 
 ---
 
-## 🧠 Ações disponíveis
+## 🔒 Segurança Embutida
 
-- `criar_perfil` — Cria um novo perfil com nome validado
-- `ver_perfil` — Retorna o perfil completo do usuário
+| Recurso                         | Descrição                                                      |
+|----------------------------------|------------------------------------------------------------------|
+| Escrita controlada em `requests/`| Apenas o próprio UID pode escrever requisições                  |
+| Leitura limitada de `responses/`| Somente o dono pode ler a resposta                              |
+| Antiflood por usuário           | Máx. 5 requisições por 10s, com apenas 1 resposta de erro       |
+| Sanitização de entradas         | Nome e bio limpos de HTML, SQL ou scripts                       |
+| Expiração automática            | Respostas são removidas após 15s                                |
+
+---
+
+## 🧠 Ações Suportadas
+
+- `criar_perfil` — Cria perfil com nome
+- `ver_perfil` — Retorna nome, bio, timestamps
 - `atualizar_perfil` — Atualiza nome e bio (limitada a 200 caracteres)
 
 ---
 
-## ✨ Diferenciais técnicos
+## ✨ Por que esse projeto é especial?
 
-- ✅ Escuta única: apenas **1 listener** no backend para todos os usuários
-- 📦 Modular: handlers separados, fácil de escalar e manter
-- ⚙️ Backend stateless: pode rodar em múltiplas instâncias (Docker, FaaS)
-- 📡 Ideal para backends invisíveis com segurança total via Firebase Rules
+- ✅ Escuta única, leve e escalável (ideal para muitos usuários)
+- 📦 Modularizado por responsabilidade (clean code)
+- 📊 Ideal como case de arquitetura em tempo real segura
+- 🔌 Pode ser usado como base para bots, dashboards, DApps ou SaaS privados
+- 💡 Perfeito para ensinar arquitetura Firebase + Node moderna
 
 ---
 
 ## 🛡️ Licença
 
-MIT — Desenvolvido por **Guilherme Lima**
+MIT — Desenvolvido com ❤️ por **Guilherme Lima**
 
 ---
-
-## 💬 Contato
-
-Mais detalhes em breve...
