@@ -2,37 +2,32 @@
   "rules": {
     "users": {
       "$uid": {
-        // ✅ Apenas o próprio usuário pode LER seus dados
-        ".read": "auth != null && auth.uid === $uid",
-        // 🚫 Nenhuma escrita global no nó do usuário
-        ".write": "false",
-
-        // ✅ Requisições: único ponto de escrita permitido
-        "requests": {
-          "$reqId": {
-            ".write": "auth != null && auth.uid === $uid",
-            ".validate": "
-              newData.hasChildren(['action']) &&
-              newData.child('action').isString() &&
-              newData.child('action').val().length >= 3 &&
-              newData.child('action').val().length <= 32
-            "
-          }
-        },
-
-        // 📤 Respostas: somente leitura permitida para o dono
+        // ✅ Somente o próprio usuário pode LER suas respostas e perfil
         "responses": {
           "$resId": {
             ".read": "auth != null && auth.uid === $uid",
             ".write": "false"
           }
         },
-
-        // 👤 Perfil: leitura permitida, escrita negada
         "perfil": {
           ".read": "auth != null && auth.uid === $uid",
           ".write": "false"
         }
+      }
+    },
+    "requests": {
+      "$reqId": {
+        // ✅ Escrita permitida apenas se o UID for o mesmo da autenticação
+        ".read": false,
+        ".write": "auth != null && auth.uid === newData.child('uid').val()",
+        ".validate": "
+          newData.hasChildren(['uid', 'action']) &&
+          newData.child('uid').isString() &&
+          newData.child('action').isString() &&
+          newData.child('uid').val().length > 0 &&
+          newData.child('action').val().length >= 3 &&
+          newData.child('action').val().length <= 32
+        "
       }
     }
   }
