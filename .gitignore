@@ -1,0 +1,11 @@
+# Ignorar credenciais sensíveis
+AccountService.json
+
+# Ignorar arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+.env
+*.log

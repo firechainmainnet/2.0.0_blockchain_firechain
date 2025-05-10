@@ -1,0 +1,20 @@
+{
+  "name": "firechain-backend",
+  "version": "1.0.0",
+  "description": "Backend seguro e assíncrono da FireChain com proteção antiflood",
+  "main": "backend.js",
+  "type": "module",
+  "scripts": {
+    "start": "node backend.js",
+    "dev": "nodemon backend.js"
+  },
+  "author": "Guilherme Lima",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "firebase-admin": "^11.10.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

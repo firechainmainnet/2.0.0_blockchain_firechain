@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>FireChain – Perfil Seguro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a1a;
+      --fg: #ffffff;
+      --primary: #ff3c00;
+      --success: #00ff9c;
+      --error: #ff4d4d;
+      --info: #00cfff;
+      --warn: #ffc107;
+      --input-bg: #1e1e1e;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      background: #121212;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(255,255,255,0.05);
+    }
+
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--input-bg);
+      color: var(--fg);
+      font-size: 1rem;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #e03300;
+    }
+
+    .section {
+      margin-top: 2rem;
+      border-top: 1px solid #292929;
+      padding-top: 1rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #perfilOutput {
+      margin-top: 1rem;
+      background: var(--input-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .toast {
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      animation: fadeInOut 4s ease forwards;
+      color: #fff;
+      min-width: 240px;
+      text-align: center;
+    }
+
+    .toast.success { background-color: var(--success); }
+    .toast.error   { background-color: var(--error); }
+    .toast.info    { background-color: var(--info); }
+    .toast.loading { background-color: var(--warn); }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(-20px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-20px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔥 FireChain</h1>
+    <h2>Gerencie seu Perfil</h2>
+
+    <div id="authSection">
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="senha" placeholder="Senha (mín. 6 caracteres)" />
+      <button onclick="criarConta()">Criar Conta</button>
+      <button onclick="login()">Entrar</button>
+    </div>
+
+    <div id="perfilSection" class="hidden">
+      <div class="section">
+        <input type="text" id="nome" placeholder="Nome do perfil" />
+        <textarea id="bio" placeholder="Sobre você... (opcional, até 200 caracteres)"></textarea>
+        <button onclick="criarPerfil()">Criar Perfil</button>
+        <button onclick="verPerfil()">Ver Perfil</button>
+        <button onclick="atualizarPerfil()">Atualizar Perfil</button>
+        <div id="perfilOutput"></div>
+      </div>
+      <div class="section">
+        <button onclick="logout()">🚪 Sair</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const config = {
+      apiKey: "AIzaSyBMmy8i6CUsDpKiLHQKWcSdT_P0txz0lPI",
+      authDomain: "firechaintech.firebaseapp.com",
+      databaseURL: "https://firechaintech-default-rtdb.firebaseio.com",
+      projectId: "firechaintech",
+      storageBucket: "firechaintech.firebasestorage.app",
+      messagingSenderId: "670938370399",
+      appId: "1:670938370399:web:5c58bc088ca81f064726ea"
+    };
+
+    const app = initializeApp(config);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const toastContainer = document.getElementById('toastContainer');
+
+    const authSection = document.getElementById('authSection');
+    const perfilSection = document.getElementById('perfilSection');
+    const nomeInput = document.getElementById('nome');
+    const bioInput = document.getElementById('bio');
+    const output = document.getElementById('perfilOutput');
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        showToast(`✅ Logado como ${user.email}`, "success");
+        authSection.classList.add('hidden');
+        perfilSection.classList.remove('hidden');
+        nomeInput.value = localStorage.getItem('firechain_nome') || '';
+        bioInput.value = localStorage.getItem('firechain_bio') || '';
+      } else {
+        showToast("⚠️ Não autenticado", "error");
+        authSection.classList.remove('hidden');
+        perfilSection.classList.add('hidden');
+      }
+    });
+
+    function criarConta() {
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+      if (!email.includes('@')) return showToast("Email inválido", "error");
+      if (senha.length < 6) return showToast("Senha muito curta", "error");
+      showToast("Criando conta...", "loading");
+      createUserWithEmailAndPassword(auth, email, senha)
+        .then(() => showToast("Conta criada com sucesso!", "success"))
+        .catch(err => showToast(err.message, "error"));
+    }
+
+    function login() {
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+      if (!email.includes('@') || senha.length < 6) return showToast("Email ou senha inválidos", "error");
+      showToast("Entrando...", "loading");
+      signInWithEmailAndPassword(auth, email, senha)
+        .then(() => showToast("Login realizado!", "success"))
+        .catch(err => showToast(err.message, "error"));
+    }
+
+    function logout() {
+      signOut(auth);
+      showToast("Desconectado", "info");
+    }
+
+    function gerarReqId() {
+      return 'req_' + Date.now();
+    }
+
+    function enviarRequisicao(action, dataExtra = {}) {
+      const user = auth.currentUser;
+      if (!user) return showToast("Não autenticado", "error");
+
+      const reqId = gerarReqId();
+      const reqRef = ref(db, `users/${user.uid}/requests/${reqId}`);
+      const resRef = ref(db, `users/${user.uid}/responses/${reqId}`);
+      const payload = { action, ...dataExtra };
+
+      output.textContent = "⏳ Aguardando resposta...";
+      set(reqRef, payload)
+        .then(() => waitForResponse(resRef))
+        .catch(err => showToast("Erro ao enviar: " + err.message, "error"));
+    }
+
+    async function waitForResponse(resRef) {
+      const maxAttempts = 15;
+      let attempts = 0;
+
+      while (attempts < maxAttempts) {
+        const snap = await get(resRef);
+        if (snap.exists()) {
+          const resp = snap.val();
+          formatarResposta(resp);
+          showToast("✅ Resposta recebida", "success");
+          return;
+        }
+        await new Promise(r => setTimeout(r, 500));
+        attempts++;
+      }
+
+      output.textContent = "⚠️ Tempo de resposta expirado.";
+      showToast("Tempo de resposta expirado", "error");
+    }
+
+    function criarPerfil() {
+      const nome = nomeInput.value.trim();
+      if (nome.length < 2) return showToast("Nome inválido", "error");
+      localStorage.setItem('firechain_nome', nome);
+      enviarRequisicao("criar_perfil", { nome });
+    }
+
+    function atualizarPerfil() {
+      const nome = nomeInput.value.trim();
+      const bio = bioInput.value.trim();
+      if (nome.length < 2) return showToast("Nome inválido", "error");
+      if (bio.length > 200) return showToast("Bio muito longa", "error");
+      localStorage.setItem('firechain_nome', nome);
+      localStorage.setItem('firechain_bio', bio);
+      enviarRequisicao("atualizar_perfil", { nome, bio });
+    }
+
+    function verPerfil() {
+      enviarRequisicao("ver_perfil");
+    }
+
+    function formatarResposta(resp) {
+      if (resp?.perfil) {
+        const { nome, bio, criadoEm, atualizadoEm } = resp.perfil;
+        output.textContent = `🧑 Nome: ${nome}
+📝 Bio: ${bio || '—'}
+📅 Criado em: ${formatarData(criadoEm)}
+🕒 Atualizado em: ${formatarData(atualizadoEm)}`;
+      } else {
+        output.textContent = JSON.stringify(resp, null, 2);
+      }
+    }
+
+    function formatarData(timestamp) {
+      if (!timestamp) return '—';
+      const d = new Date(timestamp);
+      return d.toLocaleString('pt-BR');
+    }
+
+    function showToast(msg, type = "info") {
+      const div = document.createElement('div');
+      div.className = `toast ${type}`;
+      div.textContent = msg;
+      toastContainer.appendChild(div);
+      setTimeout(() => div.remove(), 4000);
+    }
+
+    window.criarConta = criarConta;
+    window.login = login;
+    window.logout = logout;
+    window.criarPerfil = criarPerfil;
+    window.atualizarPerfil = atualizarPerfil;
+    window.verPerfil = verPerfil;
+  </script>
+</body>
+</html>
